@@ -1,13 +1,41 @@
 """
-EZ 3D Pivot Tool
+EZ 3D Pivot Tool — package initializer
 
-This package exposes the addon directly from `EZ_3DPivotTool.py` content.
-Historically the implementation was in a separate module; for a standard
-Blender addon we keep the implementation here in `__init__` so Blender's
-installer detects it immediately when the add-on folder or ZIP is selected.
+This file provides `bl_info` at the package root and forwards register/unregister
+to the implementation module `EZ_3DPivotTool.py`. Having `bl_info` here helps
+Blender detect the addon reliably when installing from a ZIP.
 """
 
-from .EZ_3DPivotTool import *
+import importlib
 
-# Re-export bl_info, register, unregister from the implementation
-__all__ = [name for name in globals().keys() if name in ("bl_info", "register", "unregister")]
+# --- Metadata (kept in sync with the implementation) ---------------------
+bl_info = {
+	"name": "EZ 3D Pivot Tool",
+	"author": "You & GitHub Copilot (Claude)",
+	"version": (1, 0, 0),
+	"blender": (4, 0, 0),
+	"location": "3D Viewport > Toolbar (T)",
+	"description": (
+		"Turns Blender's 3D cursor into a fully interactive tool pivot, similar to "
+		"the tool pivot found in Maya, 3ds Max, and other 3D applications. Provides "
+		"move & rotate gizmos, automatic pivot/orientation management, and a sticky "
+		"cursor mode that follows object transforms."
+	),
+	"category": "3D View",
+}
+
+
+def register():
+	# Import the implementation module relative to this package and forward
+	mod = importlib.import_module("EZ_3DPivotTool")
+	if hasattr(mod, "register"):
+		mod.register()
+
+
+def unregister():
+	mod = importlib.import_module("EZ_3DPivotTool")
+	if hasattr(mod, "unregister"):
+		mod.unregister()
+
+
+__all__ = ["bl_info", "register", "unregister"]
