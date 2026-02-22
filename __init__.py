@@ -1,8 +1,8 @@
 """
-EZ 3D Pivot Tool — package initializer
+CursorPivot — package initializer
 
 This file provides `bl_info` at the package root and forwards register/unregister
-to the implementation module `EZ_3DPivotTool.py`. Having `bl_info` here helps
+to the implementation module `CursorPivot.py`. Having `bl_info` here helps
 Blender detect the addon reliably when installing from a ZIP.
 """
 
@@ -10,7 +10,7 @@ import importlib
 
 # --- Metadata (kept in sync with the implementation) ---------------------
 bl_info = {
-	"name": "EZ 3D Pivot Tool",
+	"name": "CursorPivot",
 	"author": "You & GitHub Copilot (Claude)",
 	"version": (1, 0, 0),
 	"blender": (4, 0, 0),
@@ -26,14 +26,14 @@ bl_info = {
 
 
 def register():
-	# Import the implementation module relative to this package and forward
-	mod = importlib.import_module("EZ_3DPivotTool")
+	# Import the implementation module and forward
+	mod = importlib.import_module("CursorPivot")
 	if hasattr(mod, "register"):
 		mod.register()
 
 
 def unregister():
-	mod = importlib.import_module("EZ_3DPivotTool")
+	mod = importlib.import_module("CursorPivot")
 	if hasattr(mod, "unregister"):
 		mod.unregister()
 

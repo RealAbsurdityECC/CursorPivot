@@ -1,5 +1,5 @@
 bl_info = {
-    "name": "EZ 3D Pivot Tool",
+    "name": "CursorPivot",
     "author": "You & GitHub Copilot (Claude)",
     "version": (1, 0, 0),
     "blender": (4, 0, 0),
@@ -61,7 +61,7 @@ class TOOLPIVOT_OT_toggle(Operator):
 
 
 # ---------------------------------------------------------------------------
-#   N-Panel (Sidebar) – "EZ 3D Pivot Tool" tab
+#   N-Panel (Sidebar) – "CursorPivot" tab
 # ---------------------------------------------------------------------------
 
 class TOOLPIVOT_OT_reset_rotation(Operator):
@@ -220,7 +220,7 @@ class TOOLPIVOT_PT_sidebar(Panel):
     bl_label = "Cursor Pivot"
     bl_space_type = 'VIEW_3D'
     bl_region_type = 'UI'
-    bl_category = "EZ 3D Pivot Tool"
+    bl_category = "CursorPivot"
 
     def draw(self, context):
         layout = self.layout

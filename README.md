@@ -1,4 +1,4 @@
-# EZ 3D Pivot Tool for Blender
+# CursorPivot for Blender
 
 A Blender addon that turns the 3D cursor into a fully interactive **tool pivot**, similar to the tool pivot found in Maya, 3ds Max, and other 3D applications. Move and rotate gizmos let you position the pivot precisely, while automatic pivot point and transform orientation management keep everything in sync.
 
@@ -19,14 +19,14 @@ A Blender addon that turns the 3D cursor into a fully interactive **tool pivot**
 
 1. Download the repository ZIP from GitHub and extract it, or use GitHub's "Download ZIP" button.
 2. In Blender, go to **Edit → Preferences → Add-ons**
-3. Click **Install…** and navigate into the extracted folder. Select the folder named `EZ_3DPivotTool` (the package) or the ZIP itself and click **Install Add-on**.
-4. Enable the checkbox next to **"EZ 3D Pivot Tool"**
+3. Click **Install…** and navigate into the extracted folder. Select the folder named `CursorPivot` (the package) or the ZIP itself and click **Install Add-on**.
+4. Enable the checkbox next to **"CursorPivot"**
 
 ## Usage
 
 ### Activating the Tool
 - Press `D` in the 3D Viewport, **or**
-- Open the N-panel (press `N`) → **EZ 3D Pivot Tool** tab → click **Cursor Pivot: OFF**
+- Open the N-panel (press `N`) → **CursorPivot** tab → click **Cursor Pivot: OFF**
 - The tool also appears in the left-hand Toolbar (press `T`)
 
 ### Gizmo Controls
