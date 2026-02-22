@@ -17,9 +17,9 @@ A Blender addon that turns the 3D cursor into a fully interactive **tool pivot**
 
 ## Installation
 
-1. Download `EZ_3DPivotTool.py`
+1. Download the repository ZIP from GitHub and extract it, or use GitHub's "Download ZIP" button.
 2. In Blender, go to **Edit → Preferences → Add-ons**
-3. Click **Install…** and select `EZ_3DPivotTool.py`
+3. Click **Install…** and navigate into the extracted folder. Select `source/EZ_3DPivotTool.py` and click **Install Add-on**.
 4. Enable the checkbox next to **"EZ 3D Pivot Tool"**
 
 ## Usage
