@@ -159,24 +159,30 @@ def _sticky_cursor_handler(scene, depsgraph):
     _sticky_state['updating'] = True
 
     try:
-        # Decompose both matrices to isolate translation and rotation
+        # Decompose both matrices to isolate location and rotation
         prev_loc, prev_rot, _ = prev_mat.decompose()
         new_loc, new_rot, _ = new_mat.decompose()
 
         cursor = scene.cursor
         cursor_loc = mathutils.Vector(cursor.location)
 
-        # Compute rotation delta between old and new object orientation
+        # Compute rotation delta (for cursor orientation update)
         delta_rot = new_rot @ prev_rot.inverted()
         delta_rot.normalize()
 
         # --- Separate orbital motion from genuine translation ---
-        # When an object rotates around the cursor (pivot), its world
-        # position changes even though the user only rotated.  Compute
-        # where the object WOULD end up from pure rotation around the
-        # cursor and subtract that to find any genuine (grab) translation.
+        # Use the full 3x3 matrix delta (rotation + scale combined in world
+        # space) to predict exactly where the object ends up when transformed
+        # purely around the cursor.  This correctly handles rotation, scale,
+        # and any combination — per-axis scale decomposition fails because
+        # object scale is in local space, not world space.
+        try:
+            delta_3x3 = new_mat.to_3x3() @ prev_mat.to_3x3().inverted()
+        except Exception:
+            delta_3x3 = mathutils.Matrix.Identity(3)
+
         obj_offset = prev_loc - cursor_loc
-        expected_orbital_loc = cursor_loc + delta_rot @ obj_offset
+        expected_orbital_loc = cursor_loc + delta_3x3 @ obj_offset
         genuine_translation = new_loc - expected_orbital_loc
 
         # Apply rotation delta to cursor orientation
