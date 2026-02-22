@@ -3,6 +3,21 @@ import bpy
 import mathutils
 from bpy.types import GizmoGroup, Operator, Panel, WorkSpaceTool
 
+bl_info = {
+    "name": "CursorPivot",
+    "author": "You & GitHub Copilot (Claude)",
+    "version": (1, 0, 0),
+    "blender": (4, 0, 0),
+    "location": "3D Viewport > Toolbar (T)",
+    "description": (
+        "Turns Blender's 3D cursor into a fully interactive tool pivot, similar to "
+        "the tool pivot found in Maya, 3ds Max, and other 3D applications. Provides "
+        "move & rotate gizmos, automatic pivot/orientation management, and a sticky "
+        "cursor mode that follows object transforms."
+    ),
+    "category": "3D View",
+}
+
 
 # ---------------------------------------------------------------------------
 #   Operator – toggle the Cursor Pivot tool on / off
@@ -57,6 +72,11 @@ class TOOLPIVOT_OT_reset_rotation(Operator):
 
     def execute(self, context):
         context.scene.cursor.rotation_euler = (0.0, 0.0, 0.0)
+        # Refresh snapshot so sticky cursor has a clean baseline for the next transform
+        if getattr(context.scene, 'toolpivot_sticky', False) and context.active_object:
+            _sticky_state['prev_matrix'] = context.active_object.matrix_world.copy()
+        # Refresh cursor rotation snapshot
+        _sticky_state['prev_cursor_rotation'] = context.scene.cursor.rotation_euler.to_quaternion()
         return {'FINISHED'}
 
 
@@ -73,6 +93,9 @@ class TOOLPIVOT_OT_snap_to_selected(Operator):
     def execute(self, context):
         obj = context.active_object
         context.scene.cursor.location = obj.matrix_world.translation.copy()
+        # Refresh snapshot so sticky cursor has a clean baseline for the next transform
+        if getattr(context.scene, 'toolpivot_sticky', False):
+            _sticky_state['prev_matrix'] = obj.matrix_world.copy()
         return {'FINISHED'}
 
 
@@ -84,6 +107,9 @@ class TOOLPIVOT_OT_snap_to_center(Operator):
 
     def execute(self, context):
         context.scene.cursor.location = (0.0, 0.0, 0.0)
+        # Refresh snapshot so sticky cursor has a clean baseline for the next transform
+        if getattr(context.scene, 'toolpivot_sticky', False) and context.active_object:
+            _sticky_state['prev_matrix'] = context.active_object.matrix_world.copy()
         return {'FINISHED'}
 
 
@@ -112,6 +138,14 @@ class TOOLPIVOT_OT_toggle_sticky(Operator):
             _sticky_state['prev_matrix'] = context.active_object.matrix_world.copy()
         else:
             _sticky_state['prev_matrix'] = None
+        # Set transform orientation and pivot point when enabling sticky cursor
+        if scene.toolpivot_sticky:
+            scene.tool_settings.transform_pivot_point = 'CURSOR'
+            try:
+                slot = scene.transform_orientation_slots[0]
+                slot.type = 'CURSOR'
+            except Exception:
+                pass  # orientation type may not be available
         return {'FINISHED'}
 
 
@@ -122,12 +156,18 @@ def _sticky_cursor_handler(scene, depsgraph):
         return
     if not getattr(scene, 'toolpivot_sticky', False):
         return
-    if scene.tool_settings.transform_pivot_point != 'CURSOR':
+
+    # Ignore sticky cursor if the scale tool is active
+    active_tool = bpy.context.workspace.tools.from_space_view3d_mode(bpy.context.mode, create=False)
+    if active_tool and active_tool.idname == 'builtin.scale':
+        print("Sticky cursor ignored: Scale tool is active.")
         return
 
     obj = bpy.context.active_object
     if obj is None:
-        _sticky_state['prev_matrix'] = None
+        # Don't clear the snapshot — bpy.context can be incomplete during
+        # some depsgraph firings (e.g. background evals in Blender 5.0).
+        # Clearing it would corrupt the baseline for the next transform.
         return
 
     new_mat = obj.matrix_world.copy()
@@ -181,7 +221,13 @@ def _sticky_cursor_handler(scene, depsgraph):
         if genuine_translation.length_squared > 1e-10:
             cursor.location = cursor_loc + genuine_translation
     finally:
+        # Update the matrix snapshot only after transformations are applied
         _sticky_state['prev_matrix'] = new_mat
+
+        # Store the current cursor rotation for future comparisons
+        cursor_rot = scene.cursor.rotation_euler.to_quaternion()
+        _sticky_state['prev_cursor_rotation'] = cursor_rot
+
         _sticky_state['updating'] = False
 
 
