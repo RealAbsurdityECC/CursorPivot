@@ -27,6 +27,7 @@ bl_info = {
 _TOOL_IDS = {
     'OBJECT': "toolpivot.cursor_pivot_tool",
     'EDIT_MESH': "toolpivot.cursor_pivot_tool_edit",
+    'SCULPT': "toolpivot.cursor_pivot_tool_sculpt",
 }
 _ALL_TOOL_IDS = set(_TOOL_IDS.values())
 
@@ -136,8 +137,10 @@ class TOOLPIVOT_OT_toggle_sticky(Operator):
         # Snapshot current object matrix when enabling
         if scene.toolpivot_sticky and context.active_object:
             _sticky_state['prev_matrix'] = context.active_object.matrix_world.copy()
+            _sticky_state['prev_cursor_rotation'] = scene.cursor.rotation_euler.to_quaternion()
         else:
             _sticky_state['prev_matrix'] = None
+            _sticky_state['prev_cursor_rotation'] = None
         # Set transform orientation and pivot point when enabling sticky cursor
         if scene.toolpivot_sticky:
             scene.tool_settings.transform_pivot_point = 'CURSOR'
@@ -507,9 +510,25 @@ class TOOLPIVOT_WT_cursor_pivot_edit(WorkSpaceTool):
     bl_keymap = ()
 
 
+class TOOLPIVOT_WT_cursor_pivot_sculpt(WorkSpaceTool):
+    bl_space_type = 'VIEW_3D'
+    bl_context_mode = 'SCULPT'
+
+    bl_idname = "toolpivot.cursor_pivot_tool_sculpt"
+    bl_label = "Cursor Pivot"
+    bl_description = (
+        "Move and rotate the 3D cursor with gizmos. "
+        "Automatically sets pivot to 3D Cursor and orientation to Cursor."
+    )
+    bl_icon = "ops.generic.cursor"
+    bl_widget = "TOOLPIVOT_GGT_cursor_gizmos"
+    bl_keymap = ()
+
+
 _tool_classes = (
     TOOLPIVOT_WT_cursor_pivot,
     TOOLPIVOT_WT_cursor_pivot_edit,
+    TOOLPIVOT_WT_cursor_pivot_sculpt,
 )
 
 
